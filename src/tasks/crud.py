@@ -1,18 +1,24 @@
 from tasks.schemas import Task
+from fastapi import Request
 
 if __name__ != '__main__':
-    from DB.tasks_db import add_task
+    from DB.tasks_db import add_task, get_tasks
     
 import asyncio
 
 
-async def create_task(request, task: Task):
+async def create_task(request:Request, task: Task):
     dict_task = dict(task)
     await add_task(request,**dict_task)
     return {
         "status": "succsseful",
+        "message": "task successuful added",
         "added_task": dict_task
     }
+    
+async def show_tasks(request:Request, limit, offset):
+    tasks = await get_tasks(request, limit, offset)
+    return tasks
     
 
 if __name__ == '__main__':

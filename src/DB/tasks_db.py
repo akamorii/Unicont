@@ -1,6 +1,7 @@
 # from DB.db_init import pool
 from fastapi import Request
 import json
+from pydantic import BaseModel, Field
 
 async def add_task(request:Request, name, description, body, answer):
     async with request.app.state.pool.acquire() as conn:
@@ -13,10 +14,15 @@ async def add_task(request:Request, name, description, body, answer):
         )
 
 
-async def get_task(request:Request,task_id):
+async def get_tasks(request:Request, limit, offset):
     async with request.app.state.pool.acquire() as conn:
-        row = await conn.fetchrow(
-            "SELECT * FROM tasks WHERE id = $1",
-            task_id
+        rows = await conn.fetch(
+            "SELECT * FROM tasks WHERE id < $1 AND id > $2",
+            limit, offset
         )
-        return dict(row) if row else None
+    return rows if rows else None
+
+    
+
+async def update_task(request:Request, updateble_task_id, updateble_fields):
+    pass
