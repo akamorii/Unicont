@@ -1,8 +1,12 @@
 from typing import Annotated
+from contextlib import asynccontextmanager
+import asyncio
 
 import sys
 import os
+from tasks.views import router as task_router
 
+from DB.db_init import init_db,create_tables, close_db
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from fastapi import FastAPI, Path
@@ -11,10 +15,15 @@ import uvicorn
 from pydantic import BaseModel, HttpUrl
 
 # from sites.views import router as sites_router
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db(app)
+    await create_tables(app)
+    yield
+    await close_db(app)
+app = FastAPI(lifespan=lifespan)
 
-app = FastAPI()
-
-# app.include_router(sites_router)
+app.include_router(task_router)
 
 # Настройка CORS
 app.add_middleware(
@@ -24,6 +33,7 @@ app.add_middleware(
     allow_methods=["*"],  # Разрешить все методы (GET, POST, PUT и т.д.)
     allow_headers=["*"],  # Разрешить все заголовки
 )
+
 
 class MonitoredSite(BaseModel):
     addr: HttpUrl
