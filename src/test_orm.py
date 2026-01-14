@@ -1,4 +1,4 @@
 import asyncio
-from DB.orm.queries.core import create_tables
+from DB.orm.queries.orm import create_task
 
-asyncio.run(create_tables())
+asyncio.run(create_task())
